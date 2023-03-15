@@ -1,6 +1,7 @@
 package ru.denusariy.demoapisecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,7 @@ import ru.denusariy.demoapisecurity.domain.enums.Role;
 import ru.denusariy.demoapisecurity.repository.UserRepository;
 
 @Service
+@Log4j2
 @RequiredArgsConstructor
 public class AuthenticationService {
     private final UserRepository repository;
@@ -26,9 +28,10 @@ public class AuthenticationService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
+                .role(Role.ROLE_ADMIN)
                 .build();
         repository.save(user);
+        log.info("Register new user with email " + user.getEmail());
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
@@ -41,6 +44,7 @@ public class AuthenticationService {
         ));
         var user = repository.findByEmail(request.getEmail()).orElseThrow();
         var jwtToken = jwtService.generateToken(user);
+        log.info("Authenticate user with email " + user.getEmail());
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();

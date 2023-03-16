@@ -6,12 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import ru.denusariy.demoapisecurity.domain.enums.Role;
+import ru.denusariy.demoapisecurity.domain.enums.Authority;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Data
@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "_user")
+@Table(schema = "public", name = "_user")
 public class User implements UserDetails {
     @Id
     @GeneratedValue
@@ -29,11 +29,14 @@ public class User implements UserDetails {
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @ElementCollection(targetClass = Authority.class, fetch = FetchType.EAGER)
+    @CollectionTable(schema = "public", name = "_user_authority",
+    joinColumns = @JoinColumn(name = "user_id"))
+    private Set<Authority> authorities = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return authorities;
     }
 
     @Override

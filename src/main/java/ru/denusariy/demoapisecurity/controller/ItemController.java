@@ -13,23 +13,23 @@ import ru.denusariy.demoapisecurity.service.ItemService;
 public class ItemController {
     private final ItemService itemService;
 
+    @GetMapping()
+    public ResponseEntity<String> userPage() {
+        return ResponseEntity.ok("Hello, User!");
+    }
+
     @PostMapping("/create")
     public ResponseEntity<ItemResponse> create(@RequestBody ItemRequest newItem) {
         return ResponseEntity.ok(itemService.saveItem(newItem));
     }
 
-    @PatchMapping("/{id}/update")
+    @PatchMapping("/update/{id}")
     public ResponseEntity<ItemResponse> update(@PathVariable("id") int id, @RequestBody ItemRequest updatedItem) {
         return ResponseEntity.ok(itemService.updateItem(updatedItem, id));
     }
 
-    @DeleteMapping("/{id}/delete")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> delete(@PathVariable("id") int id) {
         return ResponseEntity.ok(itemService.deleteItem(id));
-    }
-
-    @GetMapping("/hello")
-    public ResponseEntity<String> hello() {
-        return ResponseEntity.ok("Hello, Admin!");
     }
 }

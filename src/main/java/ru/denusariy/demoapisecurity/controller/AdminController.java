@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import ru.denusariy.demoapisecurity.domain.dto.request.AdminRequest;
 import ru.denusariy.demoapisecurity.domain.dto.response.UserResponse;
 import ru.denusariy.demoapisecurity.service.AdminService;
 
@@ -24,8 +25,13 @@ public class AdminController {
     }
 
     @PostMapping("/appoint")
-    public ResponseEntity<UserResponse> appoint(@RequestBody String email) {
-        return ResponseEntity.ok(adminService.appointAdmin(email));
+    public ResponseEntity<UserResponse> appoint(@RequestBody AdminRequest updatedAdmin) {
+        return ResponseEntity.ok(adminService.appointAdmin(updatedAdmin));
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<UserResponse> update(@RequestBody AdminRequest updatedAdmin) {
+        return ResponseEntity.ok(adminService.updateAdmin(updatedAdmin));
     }
 
     @PostMapping("/remove")

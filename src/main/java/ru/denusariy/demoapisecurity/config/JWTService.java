@@ -17,7 +17,6 @@ import java.util.function.Function;
 @Service
 public class JWTService {
     private static final String SECRET_KEY = "33743677397A24432646294A404D635166546A576E5A7234753778214125442A";
-    //достает имя пользователя из всех полей токена
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -26,38 +25,34 @@ public class JWTService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-    //создает токен
+
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername()) //здесь будет email
-                .setIssuedAt(new Date(System.currentTimeMillis())) //когда создано
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24)) //живет 24 часа
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256) //алгоритм подписи
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-    //создает токен попроще
+
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
 
-    //валидирует токен
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
-    //проверяет, что срок жизни токена не истек
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    //достает срок жизни токена
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    //достает поля из токена
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
@@ -65,9 +60,9 @@ public class JWTService {
                 .parseClaimsJws(token)
                 .getBody();
     }
-    //добавляет подпись к токену
+
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes); //алгоритм шифрования
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

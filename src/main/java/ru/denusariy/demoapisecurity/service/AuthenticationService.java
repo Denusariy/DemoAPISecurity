@@ -11,8 +11,10 @@ import ru.denusariy.demoapisecurity.domain.dto.request.AuthenticationRequest;
 import ru.denusariy.demoapisecurity.domain.dto.request.RegisterRequest;
 import ru.denusariy.demoapisecurity.domain.dto.response.AuthenticationResponse;
 import ru.denusariy.demoapisecurity.domain.entity.User;
-import ru.denusariy.demoapisecurity.domain.enums.Role;
+import ru.denusariy.demoapisecurity.domain.enums.Authority;
 import ru.denusariy.demoapisecurity.repository.UserRepository;
+
+import java.util.Set;
 
 @Service
 @Log4j2
@@ -28,10 +30,10 @@ public class AuthenticationService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ROLE_ADMIN)
+                .authorities(Set.of(Authority.BROWS))
                 .build();
         repository.save(user);
-        log.info("Register new user with email " + user.getEmail());
+        log.info("Зарегистрирован пользователь " + user.getEmail());
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
@@ -44,7 +46,7 @@ public class AuthenticationService {
         ));
         var user = repository.findByEmail(request.getEmail()).orElseThrow();
         var jwtToken = jwtService.generateToken(user);
-        log.info("Authenticate user with email " + user.getEmail());
+        log.info("Аутентифицирован пользователь " + user.getEmail());
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();

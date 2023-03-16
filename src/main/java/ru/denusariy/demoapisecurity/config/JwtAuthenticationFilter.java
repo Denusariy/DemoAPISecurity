@@ -31,12 +31,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String userEmail;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
-            return; //передаем запрос и ответ в следующий фильтр
+            return;
         }
-        jwt = authHeader.substring(7); //потому что первые 7 это Bearer и пробел
+        jwt = authHeader.substring(7);
         userEmail = jwtService.extractUsername(jwt);
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // если пользователь не аутентифицирован, тогда проверяем его по БД
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

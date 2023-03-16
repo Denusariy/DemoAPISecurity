@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "_item")
+@Table(schema = "public", name = "_item")
 public class Item {
     @Id
     @GeneratedValue

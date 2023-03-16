@@ -10,16 +10,19 @@ import ru.denusariy.demoapisecurity.service.ItemService;
 public class ItemServiceImpl implements ItemService {
     @Override
     public ItemResponse saveItem(ItemRequest newItem) {
+        //some logic
         return null;
     }
 
     @Override
     public ItemResponse updateItem(ItemRequest updatedItem, int id) {
+        //some logic
         return null;
     }
 
     @Override
     public String deleteItem(int id) {
+        //some logic
         return null;
     }
 }

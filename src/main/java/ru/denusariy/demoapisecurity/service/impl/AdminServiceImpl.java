@@ -1,48 +1,79 @@
 package ru.denusariy.demoapisecurity.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.denusariy.demoapisecurity.domain.dto.request.AdminRequest;
 import ru.denusariy.demoapisecurity.domain.dto.response.UserResponse;
 import ru.denusariy.demoapisecurity.domain.entity.User;
-import ru.denusariy.demoapisecurity.domain.enums.Role;
-import ru.denusariy.demoapisecurity.exception.UserNotFoundException;
+import ru.denusariy.demoapisecurity.domain.enums.Authority;
 import ru.denusariy.demoapisecurity.repository.UserRepository;
 import ru.denusariy.demoapisecurity.service.AdminService;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 @Transactional
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
     public List<UserResponse> findAll() {
-        return userRepository.findByRoleEquals(Role.ROLE_ADMIN).stream()
+        return userRepository.findByAuthoritiesEquals(Authority.CREATE).stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserResponse appointAdmin(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-        user.setRole(Role.ROLE_ADMIN);
-        userRepository.save(user);
-        return convertToResponseDTO(user);
+    public UserResponse updateAdmin(AdminRequest updatedAdmin) {
+        String email = updatedAdmin.getEmail();
+        User adminToBeUpdated = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        String.format("Пользователь %s не найден!", email)));
+        User admin = User.builder()
+                .id(adminToBeUpdated.getId())
+                .firstName(updatedAdmin.getFirstName())
+                .lastName(updatedAdmin.getLastName())
+                .email(email)
+                .password(passwordEncoder.encode(updatedAdmin.getPassword()))
+                .authorities(updatedAdmin.getAuthorities())
+                .build();
+        userRepository.save(admin);
+        log.info("Обновлен админ " + email);
+        return convertToResponseDTO(admin);
+    }
+
+    @Override
+    public UserResponse appointAdmin(AdminRequest updatedAdmin) {
+        String email = updatedAdmin.getEmail();
+        User adminToBeUpdated = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        String.format("Пользователь %s не найден!", email)));
+        adminToBeUpdated.setAuthorities(updatedAdmin.getAuthorities());
+        userRepository.save(adminToBeUpdated);
+        log.info(String.format("Админу %s выданы новые права %s", email, updatedAdmin.getAuthorities().toString()));
+        return convertToResponseDTO(adminToBeUpdated);
     }
 
     @Override
     public UserResponse removeAdmin(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-        user.setRole(Role.ROLE_USER);
-        userRepository.save(user);
-        return convertToResponseDTO(user);
+        User admin = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(
+                String.format("Пользователь %s не найден!", email)));
+        admin.setAuthorities(Set.of(Authority.BROWS));
+        userRepository.save(admin);
+        log.info(String.format("Пользователь %s лишен прав админа", email));
+        return convertToResponseDTO(admin);
     }
 
     public UserResponse convertToResponseDTO(User user) {

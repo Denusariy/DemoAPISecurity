@@ -24,7 +24,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/api/v1/auth/**").permitAll();
                     auth.requestMatchers("/api/v1/admins/**").hasAuthority("SUPER_ADMIN");
-                    auth.requestMatchers("/api/v1/items/create").hasAuthority("CREATE");
+                    auth.requestMatchers("/api/v1/items/create/**").hasAuthority("CREATE");
                     auth.requestMatchers("/api/v1/items/update/**").hasAuthority("UPDATE");
                     auth.requestMatchers("/api/v1/items/delete/**").hasAuthority("DELETE");
                     auth.requestMatchers("/api/v1/items/**").hasAuthority("BROWS");

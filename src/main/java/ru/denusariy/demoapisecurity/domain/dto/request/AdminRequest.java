@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.denusariy.demoapisecurity.domain.enums.Authority;
 
-import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -17,5 +17,5 @@ public class AdminRequest {
     private String lastName;
     private String email;
     private String password;
-    private HashSet<Authority> authorities;
+    private Set<Authority> authorities;
 }

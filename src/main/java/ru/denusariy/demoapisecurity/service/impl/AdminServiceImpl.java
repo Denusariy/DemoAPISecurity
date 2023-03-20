@@ -14,13 +14,13 @@ import ru.denusariy.demoapisecurity.domain.enums.Authority;
 import ru.denusariy.demoapisecurity.repository.UserRepository;
 import ru.denusariy.demoapisecurity.service.AdminService;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Log4j2
-@Transactional
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
@@ -36,6 +36,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public UserResponse updateAdmin(AdminRequest updatedAdmin) {
         String email = updatedAdmin.getEmail();
         User adminToBeUpdated = userRepository.findByEmail(email)
@@ -55,6 +56,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public UserResponse appointAdmin(AdminRequest updatedAdmin) {
         String email = updatedAdmin.getEmail();
         User adminToBeUpdated = userRepository.findByEmail(email)
@@ -67,10 +69,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public UserResponse removeAdmin(String email) {
         User admin = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(
                 String.format("Пользователь %s не найден!", email)));
-        admin.setAuthorities(Set.of(Authority.BROWS));
+        admin.setAuthorities(new HashSet<>(Collections.singleton(Authority.BROWS)));
         userRepository.save(admin);
         log.info(String.format("Пользователь %s лишен прав админа", email));
         return convertToResponseDTO(admin);
